@@ -13,6 +13,9 @@ const policyCheckRoutes = require("./routes/policyCheckRoute");
 
 const app = express();
 
+// Enable CORS
+app.use(cors());
+
 const jsonParser = bodyParser.json();
 
 const startOpaServer = () => {
@@ -58,3 +61,10 @@ const boot = async () => {
 };
 
 boot();
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (err, promise) => {
+  console.log(`Error: ${err.message}`.red);
+  // Close server & exit process
+  // server.close(() => process.exit(1));
+});

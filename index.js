@@ -57,6 +57,15 @@ app.use("/api/v1/rego", regoRoutes);
 app.use("/api/v1/policies", jsonParser, policyCheckRoutes);
 app.use("/opa", jsonParser, opaRoutes);
 
+// health
+app.get("/health", (req, res) => {
+  process.nextTick(() => {
+    res.send({
+      success: true,
+    });
+  });
+});
+
 const loadPolicies = () => {
   const response = axios.put(
     "http://localhost:3000/api/v1/rego/publishAll/zs-content/rbac"

@@ -4,7 +4,7 @@
   "description": "Open policy agent using node-js and Postgres database for external data using input overloading strategy.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "npx nodemon index.js",
     "dev": "nodemon index.js"
   },
   "repository": {

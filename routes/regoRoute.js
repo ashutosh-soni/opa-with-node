@@ -1,14 +1,15 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 
-const { insert, getData } = require("../controller/regoController");
+const { insert, getData, publishAll } = require("../controller/regoController");
 
 const jsonParser = bodyParser.json();
 const textParser = bodyParser.text();
 
 const router = express.Router();
 
-router.post("/insert", textParser, insert);
-router.get("/:id", getData);
+router.post("/insert/:name/:type", textParser, insert);
+router.get("/:name/:type", getData);
+router.put("/publishAll/:name/:type", publishAll);
 
 module.exports = router;

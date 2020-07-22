@@ -16,11 +16,7 @@ const app = express();
 const jsonParser = bodyParser.json();
 
 const startOpaServer = () => {
-  var workerProcess = child_process.spawn("./opa", [
-    "run",
-    "--server",
-    "./opa_rest/policies/zs-content-policy.rego",
-  ]);
+  var workerProcess = child_process.spawn("./opa", ["run", "--server"]);
 
   workerProcess.stdout.on("data", function (data) {
     console.log("[LOG][stdout:][OPA]: ".brightMagenta + data);
@@ -40,23 +36,10 @@ app.use("/api/v1/data", jsonParser, dataRoutes);
 app.use("/api/v1/rego", regoRoutes);
 app.use("/api/v1/policies", jsonParser, policyCheckRoutes);
 
-const testCall = () => {
-  var config = {
-    headers: {
-      "Content-Length": 0,
-      "Content-Type": "text/plain",
-    },
-    responseType: "text",
-  };
-
-  axios
-    .put("http://localhost:8181/v1/policies/zscontent", "", config)
-    .then(function (response) {
-      console.log("saved successfully at rego");
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
+const loadPolicies = () => {
+  const response = axios.put(
+    "http://localhost:3000/api/v1/rego/publishAll/zs-content/rbac"
+  );
 };
 
 const boot = async () => {
@@ -71,7 +54,7 @@ const boot = async () => {
   app.listen(port, () => {
     console.log("App started at port:".green.bold, port);
   });
-  //   testCall();
+  loadPolicies();
 };
 
 boot();

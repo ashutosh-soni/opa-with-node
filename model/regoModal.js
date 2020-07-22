@@ -3,7 +3,7 @@ const db = require("../db/db");
 exports.insertRegoToDb = async (docObj) => {
   try {
     dbResponse = await db.getDB().withTransaction(async (tx) => {
-      return await tx.opa_rego.insert({ rego: docObj });
+      return await tx.opa_rego.insert(docObj);
     });
     return { isSuccess: true, data: dbResponse };
   } catch (e) {
@@ -17,10 +17,10 @@ exports.insertRegoToDb = async (docObj) => {
   }
 };
 
-exports.getRegoFromDb = async (docObj) => {
+exports.getRegoFromDb = async (criteria) => {
   try {
     dbResponse = await db.getDB().withTransaction(async (tx) => {
-      return await tx.opa_rego.find();
+      return await tx.opa_rego.find(criteria);
     });
     return { isSuccess: true, data: dbResponse };
   } catch (e) {

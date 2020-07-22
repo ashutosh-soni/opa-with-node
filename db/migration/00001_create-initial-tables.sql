@@ -11,6 +11,8 @@ create table if not exists "opa_data"
 create table if not exists "opa_rego"
 (
     id             serial,
+    name            text,
+    type           text,
     rego           text,
     constraint opa_rego_pkey
         primary key (id)

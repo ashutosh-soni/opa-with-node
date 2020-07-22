@@ -5,7 +5,7 @@ const db = require("./db/db");
 const colors = require("colors");
 const axios = require("axios");
 
-const config = require("./config/config").config;
+const config = require("./config/config");
 
 const dataRoutes = require("./routes/dataRoute");
 const regoRoutes = require("./routes/regoRoute");
@@ -43,13 +43,13 @@ const loadPolicies = () => {
 };
 
 const boot = async () => {
-  console.log("config", config);
-
-  const port = config["port"];
-
+  // Initialize config
+  const configObj = config.initConfig();
+  const port = configObj["PORT"];
+  console.log("config", configObj);
   startOpaServer();
 
-  await db.initDb(config["dbSpec"]);
+  await db.initDb(configObj["dbSpec"]);
 
   app.listen(port, () => {
     console.log("App started at port:".green.bold, port);

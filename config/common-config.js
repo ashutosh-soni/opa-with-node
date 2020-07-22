@@ -22,7 +22,9 @@ const commonConfig = {
     ssl: false,
     poolSize: 10,
   },
-  opaConfig: {},
+  opaConfig: {
+    url: "http://localhost:8181",
+  },
 };
 
 module.exports = commonConfig;

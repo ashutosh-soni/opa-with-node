@@ -16,5 +16,5 @@ user_is_admin {
 }
 
 get_resource_mongo_query = mongoQuery {
-    mongoQuery := acl["role_based_resource"][input.role][input.resource]["mongoQuery"]
+    mongoQuery := input["external"]["role_based_resource"][input.role][input.resource]["mongoQuery"]
 }

@@ -3,7 +3,7 @@ const db = require("../db/db");
 exports.insertDataToDb = async (docObj) => {
   try {
     dbResponse = await db.getDB().withTransaction(async (tx) => {
-      return await tx.opa_data.insert({ data: docObj });
+      return await tx.opa_data.save(docObj);
     });
     return { isSuccess: true, data: dbResponse };
   } catch (e) {
@@ -17,10 +17,10 @@ exports.insertDataToDb = async (docObj) => {
   }
 };
 
-exports.getDataFromDb = async (docObj) => {
+exports.getDataFromDb = async (criteria) => {
   try {
     dbResponse = await db.getDB().withTransaction(async (tx) => {
-      return await tx.opa_data.find();
+      return await tx.opa_data.find(criteria);
     });
     return { isSuccess: true, data: dbResponse };
   } catch (e) {

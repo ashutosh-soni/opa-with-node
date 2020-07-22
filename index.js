@@ -9,13 +9,18 @@ const config = require("./config/config").config;
 
 const dataRoutes = require("./routes/dataRoute");
 const regoRoutes = require("./routes/regoRoute");
+const policyCheckRoutes = require("./routes/policyCheckRoute");
 
 const app = express();
 
 const jsonParser = bodyParser.json();
 
 const startOpaServer = () => {
-  var workerProcess = child_process.spawn("./opa", ["run", "--server"]);
+  var workerProcess = child_process.spawn("./opa", [
+    "run",
+    "--server",
+    "./opa_rest/policies/zs-content-policy.rego",
+  ]);
 
   workerProcess.stdout.on("data", function (data) {
     console.log("[LOG][stdout:][OPA]: ".brightMagenta + data);
@@ -33,6 +38,7 @@ const startOpaServer = () => {
 // Mount routers
 app.use("/api/v1/data", jsonParser, dataRoutes);
 app.use("/api/v1/rego", regoRoutes);
+app.use("/api/v1/policies", jsonParser, policyCheckRoutes);
 
 const testCall = () => {
   var config = {

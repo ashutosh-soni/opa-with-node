@@ -12,6 +12,7 @@ const dataRoutes = require("./routes/dataRoute");
 const regoRoutes = require("./routes/regoRoute");
 const policyCheckRoutes = require("./routes/policyCheckRoute");
 const opaRoutes = require("./routes/opaRoute");
+const { publishAll } = require("./controller/regoController");
 
 const app = express();
 
@@ -66,10 +67,8 @@ app.get("/health", (req, res) => {
   });
 });
 
-const loadPolicies = () => {
-  const response = axios.put(
-    "http://localhost:3000/api/v1/rego/publishAll/zs-content/rbac"
-  );
+const loadPolicies = async () => {
+  return await publishAll();
 };
 
 const boot = async () => {
@@ -84,7 +83,7 @@ const boot = async () => {
   app.listen(port, () => {
     console.log("App started at port:".green.bold, port);
   });
-  loadPolicies();
+  await loadPolicies();
 };
 
 boot();

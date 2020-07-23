@@ -10,6 +10,6 @@ const router = express.Router();
 
 router.post("/insert/:name/:type", textParser, insert);
 router.get("/:name/:type", getData);
-router.put("/publishAll/:name/:type", publishAll);
+// router.put("/publishAll/:name/:type", publishAll);
 
 module.exports = router;

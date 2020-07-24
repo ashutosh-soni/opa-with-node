@@ -1,27 +1,71 @@
 const axios = require("axios");
 const _ = require("lodash");
 
-const { insertRegoToDb, getRegoFromDb } = require("../model/regoModal");
-const { sendResponse } = require("../utils/apiResponse.js");
+const asyncHandler = require("../middleware/async");
+const {
+  insertRegoToDb,
+  getRegoFromDb,
+  updateRegoToDb,
+} = require("../model/regoModal");
+const { sendResponse, ErrorResponse } = require("../utils/apiResponse.js");
 const config = require("../config/config");
 
-exports.insert = async (req, res, next) => {
+exports.insert = asyncHandler(async (req, res, next) => {
   const { name, type } = req.params;
   const docObj = { name, type, rego: req.body };
-  // console.log("Request body", req.body);
-  // console.log(docObj);
-  const dbResponse = await insertRegoToDb(docObj);
-  sendResponse(res, dbResponse);
-};
+  const dbCheck = await getRegoFromDb({ name, type });
 
-exports.getData = async (req, res, next) => {
+  if (dbCheck.isSuccess) {
+    if (_.isEmpty(dbCheck.data)) {
+      const dbResponse = await insertRegoToDb(docObj);
+      sendResponse(res, dbResponse);
+    } else {
+      ErrorResponse(
+        res,
+        `Rego for combination ${name} and ${type} already exist.`
+      );
+    }
+  } else {
+    console.log("Error: ".red, dbCheck.err);
+    ErrorResponse(res, `Internal Server error`);
+  }
+});
+
+exports.update = asyncHandler(async (req, res, next) => {
+  const { name, type, id } = req.params;
+  const docObj = { id, name, type, rego: req.body };
+  const dbCheck = await getRegoFromDb({ name, type, id });
+  console.log(dbCheck);
+
+  if (dbCheck.isSuccess) {
+    if (_.isEmpty(dbCheck.data)) {
+      ErrorResponse(
+        res,
+        `Rego for combination ${name} and ${type} for id: ${id} does not exist.`
+      );
+    } else {
+      const dbResponse = await updateRegoToDb(docObj);
+      sendResponse(res, dbResponse);
+    }
+  } else {
+    console.log("Error: ".red, dbCheck.err);
+    ErrorResponse(res, `Internal Server error`);
+  }
+});
+
+exports.getRego = asyncHandler(async (req, res, next) => {
   const { name, type } = req.params;
   const dbResponse = await getRegoFromDb({ name, type });
-  const normalizedResponse = dbResponse["data"][0]["rego"];
+  sendResponse(res, dbResponse);
+});
+
+exports.getRegoById = asyncHandler(async (req, res, next) => {
+  const { name, type, id } = req.params;
+  const dbResponse = await getRegoFromDb({ name, type, id });
+  const normalizedResponse = _.get(dbResponse, ["data", 0, "rego"], null);
   res.setHeader("content-type", "text/plain");
   res.send(normalizedResponse);
-  // sendResponse(res, dbResponse);
-};
+});
 
 exports.publishAll = async () => {
   const opaConfig = config.getConfig()["opaConfig"];

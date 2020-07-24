@@ -17,13 +17,16 @@ exports.insert = asyncHandler(async (req, res, next) => {
 
   const docObj = { name, type, data: req.body };
   const dbCheck = await getDataFromDb({ name, type });
-  console.log(dbCheck);
+  // console.log(dbCheck);
   if (dbCheck.isSuccess) {
     if (_.isEmpty(dbCheck.data)) {
       const dbResponse = await insertDataToDb(docObj);
       sendResponse(res, dbResponse);
     } else {
-      ErrorResponse(res, `data for combination ${name} and ${type} exist.`);
+      ErrorResponse(
+        res,
+        `data for combination ${name} and ${type} already exist.`
+      );
     }
   } else {
     console.log("Error: ".red, dbCheck.err);
@@ -36,7 +39,7 @@ exports.update = asyncHandler(async (req, res, next) => {
 
   const docObj = { id, name, type, data: req.body };
   const dbCheck = await getDataFromDb({ name, type, id });
-  console.log(dbCheck);
+  // console.log(dbCheck);
   if (dbCheck.isSuccess) {
     if (_.isEmpty(dbCheck.data)) {
       ErrorResponse(

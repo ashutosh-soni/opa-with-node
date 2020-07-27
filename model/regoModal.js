@@ -56,3 +56,5 @@ exports.getRegoFromDb = async (criteria) => {
     };
   }
 };
+
+

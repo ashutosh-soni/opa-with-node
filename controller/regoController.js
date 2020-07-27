@@ -31,6 +31,27 @@ exports.insert = asyncHandler(async (req, res, next) => {
   }
 });
 
+const updateRegoToOpa = async (regoDoc) => {
+    const opaConfig = config.getConfig()["opaConfig"];
+  console.log("Testing updateRegoToOpa", opaConfig);
+  const {name, type, rego} = regoDoc;
+  const path = `${opaConfig["url"]}/v1/policies/${name}/${type}`;
+  const configAxios = {
+    headers: {
+      "Content-Type": "text/plain",
+    },
+    responseType: "text",
+  };
+  const response = await axios.put(path, rego, configAxios);
+  if (response.status == 200) {
+    console.log(`Policy loaded for ${path}`.green);
+    return {isSuccess: true };
+  } else {
+    console.log(`Policy not loaded for ${path} with ${response.data}`.red);
+    return {isSuccess: false, err: response.data };
+  }
+} 
+
 exports.update = asyncHandler(async (req, res, next) => {
   const { name, type, id } = req.params;
   const docObj = { id, name, type, rego: req.body };
@@ -45,7 +66,15 @@ exports.update = asyncHandler(async (req, res, next) => {
       );
     } else {
       const dbResponse = await updateRegoToDb(docObj);
-      sendResponse(res, dbResponse);
+      const { isSuccess, data } = dbResponse;
+      if(isSuccess){
+        opaResponse = await updateRegoToOpa(data);
+        if (opaResponse.isSuccess){
+          sendResponse(res, dbResponse);
+        }else{
+          sendResponse(res, opaResponse.err);
+        }
+      }
     }
   } else {
     console.log("Error: ".red, dbCheck.err);
@@ -67,6 +96,8 @@ exports.getRegoById = asyncHandler(async (req, res, next) => {
   res.send(normalizedResponse);
 });
 
+
+
 exports.publishAll = async () => {
   const opaConfig = config.getConfig()["opaConfig"];
   const dbResponse = await getRegoFromDb({});
@@ -80,18 +111,18 @@ exports.publishAll = async () => {
         "name",
       ])}/${_.get(doc, ["type"])}`;
       const rego = _.get(doc, ["rego"]);
-      const config = {
+      const configAxios = {
         headers: {
           "Content-Type": "text/plain",
         },
         responseType: "text",
       };
 
-      const response = await axios.put(path, rego, config);
+      const response = await axios.put(path, rego, configAxios);
       if (response.status == 200) {
         console.log(`Policy loaded for ${path}`.green);
       } else {
-        console.log(`Policy loaded for ${path}`.red);
+        console.log(`Policy not loaded for ${path}`.red);
       }
     });
   }

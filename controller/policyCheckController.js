@@ -18,7 +18,7 @@ exports.check = asyncHandler(async (req, res, next) => {
 
   try {
     const opaResponse = await axios.post(opaPath, docObj);
-    console.log(opaResponse);
+    // console.log(opaResponse);
 
     if (opaResponse["status"] == 200) {
       res.status(200).json(opaResponse["data"]);

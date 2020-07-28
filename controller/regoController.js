@@ -10,6 +10,27 @@ const {
 const { sendResponse, ErrorResponse } = require("../utils/apiResponse.js");
 const config = require("../config/config");
 
+const upsertRegoToOpa = async (regoDoc) => {
+  const opaConfig = config.getConfig()["opaConfig"];
+// console.log("Testing updateRegoToOpa", opaConfig);
+const {name, type, rego} = regoDoc;
+const path = `${opaConfig["url"]}/v1/policies/${name}/${type}`;
+const configAxios = {
+  headers: {
+    "Content-Type": "text/plain",
+  },
+  responseType: "text",
+};
+const response = await axios.put(path, rego, configAxios);
+if (response.status == 200) {
+  console.log(`Policy loaded for ${path}`.green);
+  return {isSuccess: true };
+} else {
+  console.log(`Policy not loaded for ${path} with ${response.data}`.red);
+  return {isSuccess: false, err: response.data };
+}
+} 
+
 exports.insert = asyncHandler(async (req, res, next) => {
   const { name, type } = req.params;
   const docObj = { name, type, rego: req.body };
@@ -18,7 +39,15 @@ exports.insert = asyncHandler(async (req, res, next) => {
   if (dbCheck.isSuccess) {
     if (_.isEmpty(dbCheck.data)) {
       const dbResponse = await insertRegoToDb(docObj);
-      sendResponse(res, dbResponse);
+      const { isSuccess, data } = dbResponse;
+      if(isSuccess){
+        opaResponse = await upsertRegoToOpa(data);
+        if (opaResponse.isSuccess){
+          sendResponse(res, dbResponse);
+        }else{
+          sendResponse(res, opaResponse.err);
+        }
+      }
     } else {
       ErrorResponse(
         res,
@@ -31,26 +60,7 @@ exports.insert = asyncHandler(async (req, res, next) => {
   }
 });
 
-const updateRegoToOpa = async (regoDoc) => {
-    const opaConfig = config.getConfig()["opaConfig"];
-  console.log("Testing updateRegoToOpa", opaConfig);
-  const {name, type, rego} = regoDoc;
-  const path = `${opaConfig["url"]}/v1/policies/${name}/${type}`;
-  const configAxios = {
-    headers: {
-      "Content-Type": "text/plain",
-    },
-    responseType: "text",
-  };
-  const response = await axios.put(path, rego, configAxios);
-  if (response.status == 200) {
-    console.log(`Policy loaded for ${path}`.green);
-    return {isSuccess: true };
-  } else {
-    console.log(`Policy not loaded for ${path} with ${response.data}`.red);
-    return {isSuccess: false, err: response.data };
-  }
-} 
+
 
 exports.update = asyncHandler(async (req, res, next) => {
   const { name, type, id } = req.params;
@@ -68,7 +78,7 @@ exports.update = asyncHandler(async (req, res, next) => {
       const dbResponse = await updateRegoToDb(docObj);
       const { isSuccess, data } = dbResponse;
       if(isSuccess){
-        opaResponse = await updateRegoToOpa(data);
+        opaResponse = await upsertRegoToOpa(data);
         if (opaResponse.isSuccess){
           sendResponse(res, dbResponse);
         }else{

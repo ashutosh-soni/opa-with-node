@@ -108,7 +108,7 @@ exports.getRegoById = asyncHandler(async (req, res, next) => {
 
 
 
-exports.publishAll = async () => {
+exports.publishAll = asyncHandler(async (req, res) => {
   const opaConfig = config.getConfig()["opaConfig"];
   const dbResponse = await getRegoFromDb({});
   const regoList = _.get(dbResponse, ["data"], null);
@@ -116,7 +116,12 @@ exports.publishAll = async () => {
   if (_.isEmpty(regoList)) {
     console.log("No rego is there in db".red);
   } else {
-    regoList.forEach(async (doc, index) => {
+    var successfulCount = 0;
+    var failedCount = 0;
+    let regoListLength = regoList.length;
+
+    for (let i = 0; i < regoListLength; i++){
+      const doc = regoList[i];
       const path = `${opaConfig["url"]}/v1/policies/${_.get(doc, [
         "name",
       ])}/${_.get(doc, ["type"])}`;
@@ -127,14 +132,22 @@ exports.publishAll = async () => {
         },
         responseType: "text",
       };
-
       const response = await axios.put(path, rego, configAxios);
       if (response.status == 200) {
         console.log(`Policy loaded for ${path}`.green);
+        successfulCount = successfulCount + 1;
       } else {
         console.log(`Policy not loaded for ${path}`.red);
+        failedCount = failedCount + 1;
       }
-    });
+    }
+
+    let msg = {successfulCount, failedCount}
+    if (failedCount > 0){
+      res.status(500).json(msg); 
+    } else {
+      res.status(200).json(msg);
+    }
+
   }
-  return 0;
-};
+}); 

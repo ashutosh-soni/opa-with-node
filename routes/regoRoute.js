@@ -18,6 +18,6 @@ router.post("/insert/:name/:type", textParser, insert);
 router.put("/update/:name/:type/:id", textParser, update);
 router.get("/:name/:type", getRego);
 router.get("/:name/:type/:id", getRegoById);
-// router.put("/publishAll/:name/:type", publishAll);
+router.get("/publishAll", publishAll);
 
 module.exports = router;

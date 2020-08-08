@@ -76,14 +76,14 @@ const boot = async () => {
   const configObj = config.initConfig();
   const port = configObj["PORT"];
   console.log("config", configObj);
-  await startOpaServer();
+  // await startOpaServer();
 
   await db.initDb(configObj["dbSpec"]);
 
   app.listen(port, () => {
     console.log("App started at port:".green.bold, port);
   });
-  await loadPolicies();
+  // await loadPolicies();
 };
 
 boot();

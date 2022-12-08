@@ -22,7 +22,7 @@
     "axios": "^0.19.2",
     "colors": "^1.4.0",
     "cors": "^2.8.5",
-    "express": "^4.17.1",
+    "express": "^4.18.2",
     "lodash": "^4.17.19",
     "massive": "^6.6.0",
     "postgres-migrations": "^4.0.3"
